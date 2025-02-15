@@ -47,6 +47,17 @@ const mockSurgeries: Surgery[] = [
   },
 ];
 
+const timeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+const minutesToTime = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+};
+
 const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) => {
   const navigate = useNavigate();
   const surgery = surgeries.find(
@@ -71,17 +82,6 @@ const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) =
   };
 
   const isStartTime = surgery?.startTime === time;
-
-  const timeToMinutes = (time: string): number => {
-    const [hours, minutes] = time.split(":").map(Number);
-    return hours * 60 + minutes;
-  };
-
-  const minutesToTime = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-  };
 
   const handleExtendPeriod = (surgeryId: string, newDuration: number) => {
     // In a real app, this would update the backend
