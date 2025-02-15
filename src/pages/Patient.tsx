@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const PatientPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("trace");
+  const [activeTab, setActiveTab] = useState("info");
 
   // Mock data
   const surgeryTime = "2024-04-15T14:30:00";
@@ -97,20 +97,11 @@ const PatientPage = () => {
         </Card>
 
         <Card className="p-6 animate-fade-up delay-200">
-          <Tabs defaultValue="trace" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="trace">Trace</TabsTrigger>
+          <Tabs defaultValue="info" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="info">My Info</TabsTrigger>
               <TabsTrigger value="delay">Signal Delay</TabsTrigger>
             </TabsList>
-            <TabsContent value="trace" className="space-y-4">
-              <h4 className="font-medium">Surgery Preparation Timeline</h4>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p>- Pre-surgery consultation</p>
-                <p>- Required tests and examinations</p>
-                <p>- Medication schedule</p>
-              </div>
-            </TabsContent>
             <TabsContent value="info" className="space-y-4">
               <h4 className="font-medium">Personal Information</h4>
               <div className="space-y-2 text-sm text-muted-foreground">
