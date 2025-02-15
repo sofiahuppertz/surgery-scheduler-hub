@@ -3,8 +3,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Clock } from "lucide-react";
+import { ChevronLeft, Clock, Timer, ArrowLeftRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Surgery {
   id: string;
@@ -12,6 +17,7 @@ interface Surgery {
   startTime: string;
   endTime: string;
   status: "scheduled" | "in-progress" | "completed";
+  progressStatus: "on-time" | "delayed" | "canceled";
 }
 
 const mockSurgeries: Surgery[] = [
@@ -21,6 +27,7 @@ const mockSurgeries: Surgery[] = [
     startTime: "09:00",
     endTime: "10:30",
     status: "scheduled",
+    progressStatus: "on-time",
   },
   {
     id: "2",
@@ -28,6 +35,7 @@ const mockSurgeries: Surgery[] = [
     startTime: "11:00",
     endTime: "13:00",
     status: "in-progress",
+    progressStatus: "delayed",
   },
   {
     id: "3",
@@ -35,6 +43,7 @@ const mockSurgeries: Surgery[] = [
     startTime: "14:00",
     endTime: "15:00",
     status: "completed",
+    progressStatus: "on-time",
   },
 ];
 
@@ -50,20 +59,99 @@ const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) =
     completed: "bg-green-100 text-green-800 border-green-200",
   };
 
+  const progressStatusColors = {
+    "on-time": "text-green-600",
+    delayed: "text-yellow-600",
+    canceled: "text-red-600",
+  };
+
+  const isStartTime = surgery?.startTime === time;
+
+  const [hours, setHours] = useState<number[]>([]);
+  const timeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const minutesToTime = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+  };
+
+  const handleExtendPeriod = (surgeryId: string, newDuration: number) => {
+    // In a real app, this would update the backend
+    console.log(`Extending surgery ${surgeryId} by ${newDuration} hours`);
+  };
+
   return (
     <div className="relative grid grid-cols-[80px_1fr] gap-4 py-2 border-t">
       <div className="text-sm text-muted-foreground">{time}</div>
-      {surgery && (
-        <Button
-          variant="ghost"
+      {surgery && isStartTime && (
+        <div
           className={cn(
-            "h-auto text-left justify-start font-normal",
+            "rounded-lg border px-4 py-3",
             statusColors[surgery.status]
           )}
-          onClick={() => navigate(`/surgery/${surgery.id}`)}
+          style={{
+            gridRow: `span ${
+              (timeToMinutes(surgery.endTime) - timeToMinutes(surgery.startTime)) / 15
+            }`,
+          }}
         >
-          {surgery.title}
-        </Button>
+          <div className="flex items-start justify-between">
+            <div>
+              <Button
+                variant="ghost"
+                className="h-auto p-0 text-left font-medium hover:bg-transparent"
+                onClick={() => navigate(`/surgery/${surgery.id}`)}
+              >
+                {surgery.title}
+              </Button>
+              <div
+                className={cn(
+                  "text-sm mt-1 flex items-center gap-2",
+                  progressStatusColors[surgery.progressStatus]
+                )}
+              >
+                <Timer className="h-3 w-3" />
+                {surgery.progressStatus}
+              </div>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 border-dashed"
+                >
+                  <ArrowLeftRight className="h-4 w-4 mr-1" />
+                  Extend
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Adjust Duration</h4>
+                  <div className="flex flex-col gap-2">
+                    {[2, 4, 6, 8].map((hours) => (
+                      <Button
+                        key={hours}
+                        variant="outline"
+                        className="justify-start"
+                        onClick={() => handleExtendPeriod(surgery.id, hours)}
+                      >
+                        {hours} hours
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="text-sm mt-2">
+            {surgery.startTime} - {surgery.endTime}
+          </div>
+        </div>
       )}
     </div>
   );
