@@ -50,7 +50,12 @@ const mockSurgeries: Surgery[] = [
 const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) => {
   const navigate = useNavigate();
   const surgery = surgeries.find(
-    (s) => s.startTime === time || (s.startTime < time && s.endTime > time)
+    (s) => {
+      const timeMinutes = timeToMinutes(time);
+      const startMinutes = timeToMinutes(s.startTime);
+      const endMinutes = timeToMinutes(s.endTime);
+      return timeMinutes >= startMinutes && timeMinutes < endMinutes;
+    }
   );
 
   const statusColors = {
@@ -67,7 +72,6 @@ const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) =
 
   const isStartTime = surgery?.startTime === time;
 
-  const [hours, setHours] = useState<number[]>([]);
   const timeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
@@ -95,7 +99,7 @@ const TimeSlot = ({ time, surgeries }: { time: string; surgeries: Surgery[] }) =
           )}
           style={{
             gridRow: `span ${
-              (timeToMinutes(surgery.endTime) - timeToMinutes(surgery.startTime)) / 15
+              Math.ceil((timeToMinutes(surgery.endTime) - timeToMinutes(surgery.startTime)) / 15)
             }`,
           }}
         >
